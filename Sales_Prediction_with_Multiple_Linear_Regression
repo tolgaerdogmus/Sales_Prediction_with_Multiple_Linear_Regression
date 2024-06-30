@@ -1,1 +1,798 @@
-{"metadata":{"kernelspec":{"language":"python","display_name":"Python 3","name":"python3"},"language_info":{"name":"python","version":"3.10.13","mimetype":"text/x-python","codemirror_mode":{"name":"ipython","version":3},"pygments_lexer":"ipython3","nbconvert_exporter":"python","file_extension":".py"},"kaggle":{"accelerator":"none","dataSources":[{"sourceId":8825252,"sourceType":"datasetVersion","datasetId":5309605}],"dockerImageVersionId":30732,"isInternetEnabled":true,"language":"python","sourceType":"notebook","isGpuEnabled":false}},"nbformat_minor":4,"nbformat":4,"cells":[{"cell_type":"code","source":"import numpy as np # linear algebra\nimport pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)\nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\nfrom sklearn.linear_model import LinearRegression\nfrom sklearn.metrics import mean_squared_error, mean_absolute_error\nfrom sklearn.model_selection import train_test_split, cross_val_score\n\n# Settings\npd.set_option(\"display.float_format\", lambda x: \"%.2f\" % x)\n\n\n# Input data files are available in the read-only \"../input/\" directory\n# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory\n\nimport os\nfor dirname, _, filenames in os.walk('/kaggle/input'):\n    for filename in filenames:\n        print(os.path.join(dirname, filename))","metadata":{"_uuid":"8f2839f25d086af736a60e9eeb907d3b93b6e0e5","_cell_guid":"b1076dfc-b9ad-4769-8c92-a6c4dae69d19","execution":{"iopub.status.busy":"2024-06-30T16:41:54.831994Z","iopub.execute_input":"2024-06-30T16:41:54.832377Z","iopub.status.idle":"2024-06-30T16:41:58.501707Z","shell.execute_reply.started":"2024-06-30T16:41:54.832345Z","shell.execute_reply":"2024-06-30T16:41:58.500203Z"},"trusted":true},"execution_count":1,"outputs":[{"name":"stdout","text":"/kaggle/input/advertising/advertising.csv\n","output_type":"stream"}]},{"cell_type":"markdown","source":"## Multiple Linear Regression","metadata":{}},{"cell_type":"code","source":"df = pd.read_csv(\"/kaggle/input/advertising/advertising.csv\")","metadata":{"execution":{"iopub.status.busy":"2024-06-30T16:42:48.329025Z","iopub.execute_input":"2024-06-30T16:42:48.329411Z","iopub.status.idle":"2024-06-30T16:42:48.337685Z","shell.execute_reply.started":"2024-06-30T16:42:48.329382Z","shell.execute_reply":"2024-06-30T16:42:48.336301Z"},"trusted":true},"execution_count":3,"outputs":[]},{"cell_type":"code","source":"# Sales bağımlı değişkenini düşürüp diğer tüm bağımlı değişkenleri X e ata.\nX = df.drop(\"sales\", axis=1)","metadata":{"execution":{"iopub.status.busy":"2024-06-30T16:44:54.796631Z","iopub.execute_input":"2024-06-30T16:44:54.797035Z","iopub.status.idle":"2024-06-30T16:44:54.804071Z","shell.execute_reply.started":"2024-06-30T16:44:54.797005Z","shell.execute_reply":"2024-06-30T16:44:54.802696Z"},"trusted":true},"execution_count":6,"outputs":[]},{"cell_type":"code","source":"# Bağımlı değişkeni de y ye ata\ny = df[[\"sales\"]]","metadata":{"execution":{"iopub.status.busy":"2024-06-30T16:44:56.427955Z","iopub.execute_input":"2024-06-30T16:44:56.428381Z","iopub.status.idle":"2024-06-30T16:44:56.434938Z","shell.execute_reply.started":"2024-06-30T16:44:56.428347Z","shell.execute_reply":"2024-06-30T16:44:56.433525Z"},"trusted":true},"execution_count":7,"outputs":[]},{"cell_type":"markdown","source":"## Model ","metadata":{}},{"cell_type":"code","source":"","metadata":{},"execution_count":null,"outputs":[]}]}
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "e19e0d1f",
+   "metadata": {
+    "_cell_guid": "b1076dfc-b9ad-4769-8c92-a6c4dae69d19",
+    "_uuid": "8f2839f25d086af736a60e9eeb907d3b93b6e0e5",
+    "execution": {
+     "iopub.execute_input": "2024-06-30T17:27:29.478291Z",
+     "iopub.status.busy": "2024-06-30T17:27:29.477791Z",
+     "iopub.status.idle": "2024-06-30T17:27:32.413349Z",
+     "shell.execute_reply": "2024-06-30T17:27:32.411830Z"
+    },
+    "papermill": {
+     "duration": 2.94613,
+     "end_time": "2024-06-30T17:27:32.415865",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:29.469735",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "/kaggle/input/advertising/advertising.csv\n"
+     ]
+    }
+   ],
+   "source": [
+    "import numpy as np # linear algebra\n",
+    "import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)\n",
+    "import matplotlib.pyplot as plt\n",
+    "import seaborn as sns\n",
+    "\n",
+    "from sklearn.linear_model import LinearRegression\n",
+    "from sklearn.metrics import mean_squared_error, mean_absolute_error\n",
+    "from sklearn.model_selection import train_test_split, cross_val_score\n",
+    "\n",
+    "# Settings\n",
+    "pd.set_option(\"display.float_format\", lambda x: \"%.2f\" % x)\n",
+    "\n",
+    "\n",
+    "# Input data files are available in the read-only \"../input/\" directory\n",
+    "# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory\n",
+    "\n",
+    "import os\n",
+    "for dirname, _, filenames in os.walk('/kaggle/input'):\n",
+    "    for filename in filenames:\n",
+    "        print(os.path.join(dirname, filename))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "624fd8e7",
+   "metadata": {
+    "papermill": {
+     "duration": 0.005529,
+     "end_time": "2024-06-30T17:27:32.427333",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:32.421804",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "## Multiple Linear Regression"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "ac66fb7b",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-30T17:27:32.441079Z",
+     "iopub.status.busy": "2024-06-30T17:27:32.439859Z",
+     "iopub.status.idle": "2024-06-30T17:27:32.457036Z",
+     "shell.execute_reply": "2024-06-30T17:27:32.455868Z"
+    },
+    "papermill": {
+     "duration": 0.026778,
+     "end_time": "2024-06-30T17:27:32.459697",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:32.432919",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "df = pd.read_csv(\"/kaggle/input/advertising/advertising.csv\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "b650ec11",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-30T17:27:32.472852Z",
+     "iopub.status.busy": "2024-06-30T17:27:32.472473Z",
+     "iopub.status.idle": "2024-06-30T17:27:32.488901Z",
+     "shell.execute_reply": "2024-06-30T17:27:32.487692Z"
+    },
+    "papermill": {
+     "duration": 0.025937,
+     "end_time": "2024-06-30T17:27:32.491409",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:32.465472",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "# Sales bağımlı değişkenini düşürüp diğer tüm bağımlı değişkenleri X e ata.\n",
+    "X = df.drop(\"sales\", axis=1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "97ffc6b2",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-30T17:27:32.504427Z",
+     "iopub.status.busy": "2024-06-30T17:27:32.504037Z",
+     "iopub.status.idle": "2024-06-30T17:27:32.511738Z",
+     "shell.execute_reply": "2024-06-30T17:27:32.510773Z"
+    },
+    "papermill": {
+     "duration": 0.016886,
+     "end_time": "2024-06-30T17:27:32.513996",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:32.497110",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "# Bağımlı değişkeni de y ye ata\n",
+    "y = df[[\"sales\"]]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "fa0a267e",
+   "metadata": {
+    "papermill": {
+     "duration": 0.005382,
+     "end_time": "2024-06-30T17:27:32.525017",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:32.519635",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "## Model "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "0b3dd3c0",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-30T17:27:32.538028Z",
+     "iopub.status.busy": "2024-06-30T17:27:32.537613Z",
+     "iopub.status.idle": "2024-06-30T17:27:32.548318Z",
+     "shell.execute_reply": "2024-06-30T17:27:32.546985Z"
+    },
+    "papermill": {
+     "duration": 0.020228,
+     "end_time": "2024-06-30T17:27:32.550840",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:32.530612",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "c3ec6a45",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-30T17:27:32.564043Z",
+     "iopub.status.busy": "2024-06-30T17:27:32.563619Z",
+     "iopub.status.idle": "2024-06-30T17:27:32.572060Z",
+     "shell.execute_reply": "2024-06-30T17:27:32.570942Z"
+    },
+    "papermill": {
+     "duration": 0.017822,
+     "end_time": "2024-06-30T17:27:32.574381",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:32.556559",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(40, 1)"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "y_test.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "f73fd19b",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-30T17:27:32.587805Z",
+     "iopub.status.busy": "2024-06-30T17:27:32.587433Z",
+     "iopub.status.idle": "2024-06-30T17:27:32.594712Z",
+     "shell.execute_reply": "2024-06-30T17:27:32.593609Z"
+    },
+    "papermill": {
+     "duration": 0.016496,
+     "end_time": "2024-06-30T17:27:32.596982",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:32.580486",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(160, 1)"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "y_train.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "e9062395",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-30T17:27:32.611443Z",
+     "iopub.status.busy": "2024-06-30T17:27:32.611067Z",
+     "iopub.status.idle": "2024-06-30T17:27:32.641173Z",
+     "shell.execute_reply": "2024-06-30T17:27:32.639856Z"
+    },
+    "papermill": {
+     "duration": 0.040713,
+     "end_time": "2024-06-30T17:27:32.644438",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:32.603725",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "reg_model = LinearRegression().fit(X_train, y_train)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "ce249a60",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-30T17:27:32.659176Z",
+     "iopub.status.busy": "2024-06-30T17:27:32.658398Z",
+     "iopub.status.idle": "2024-06-30T17:27:32.666285Z",
+     "shell.execute_reply": "2024-06-30T17:27:32.664899Z"
+    },
+    "papermill": {
+     "duration": 0.018317,
+     "end_time": "2024-06-30T17:27:32.668756",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:32.650439",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([2.90794702])"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# sabit (b - bias)\n",
+    "reg_model.intercept_"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "3b7c5246",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-30T17:27:32.683041Z",
+     "iopub.status.busy": "2024-06-30T17:27:32.682604Z",
+     "iopub.status.idle": "2024-06-30T17:27:32.689565Z",
+     "shell.execute_reply": "2024-06-30T17:27:32.688412Z"
+    },
+    "papermill": {
+     "duration": 0.016515,
+     "end_time": "2024-06-30T17:27:32.691835",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:32.675320",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([[0.0468431 , 0.17854434, 0.00258619]])"
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# coefficients (w - weights)\n",
+    "reg_model.coef_"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "31a8b8a7",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006201,
+     "end_time": "2024-06-30T17:27:32.704139",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:32.697938",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "## Prediction "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "31a6554b",
+   "metadata": {
+    "papermill": {
+     "duration": 0.005678,
+     "end_time": "2024-06-30T17:27:32.715969",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:32.710291",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "Aşağıdaki gözlem bdeğerlerine göre satışın beklenen değeri nedir?\n",
+    "\n",
+    "TV: 30\n",
+    "radio: 10\n",
+    "newspaper: 40"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "875b32ff",
+   "metadata": {
+    "papermill": {
+     "duration": 0.005706,
+     "end_time": "2024-06-30T17:27:32.728077",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:32.722371",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "sales = 2.90 + TV * 0.04 + radio * 0.17 + newspaper * 0.002"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "id": "8170e01d",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-30T17:27:32.742264Z",
+     "iopub.status.busy": "2024-06-30T17:27:32.741862Z",
+     "iopub.status.idle": "2024-06-30T17:27:32.754838Z",
+     "shell.execute_reply": "2024-06-30T17:27:32.753523Z"
+    },
+    "papermill": {
+     "duration": 0.02306,
+     "end_time": "2024-06-30T17:27:32.757143",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:32.734083",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/opt/conda/lib/python3.10/site-packages/sklearn/base.py:439: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names\n",
+      "  warnings.warn(\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "array([[6.202131]])"
+      ]
+     },
+     "execution_count": 11,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# x1, x2, x3 = 30, 10, 40\n",
+    "# b = 2.90794702\n",
+    "# w1, w2, w3 = 0.0468431 , 0.17854434, 0.00258619\n",
+    "#y_hat = b + w1*x1 + w2*x2 + w3*x3\n",
+    "\n",
+    "yeni_xler = [[30], [10], [40]]\n",
+    "yeni_xler = pd.DataFrame(yeni_xler).T\n",
+    "\n",
+    "reg_model.predict(yeni_xler)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "id": "c3af5aaf",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-30T17:27:32.771480Z",
+     "iopub.status.busy": "2024-06-30T17:27:32.771079Z",
+     "iopub.status.idle": "2024-06-30T17:27:32.778750Z",
+     "shell.execute_reply": "2024-06-30T17:27:32.777649Z"
+    },
+    "papermill": {
+     "duration": 0.017656,
+     "end_time": "2024-06-30T17:27:32.781231",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:32.763575",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "4.3132401161261456"
+      ]
+     },
+     "execution_count": 12,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# x = 30\n",
+    "# b = 2.90794702\n",
+    "# w = 0.0468431\n",
+    "# y_hat = b + w*x\n",
+    "# y_hat = 2.90794702 + 0.0468431*30\n",
+    "reg_model.intercept_[0] + reg_model.coef_[0][0]*30\n",
+    "\n",
+    "# TV 30 için satışlar: \n",
+    "# y_hat = 4.3132401161261456"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "id": "4fc16993",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-30T17:27:32.796691Z",
+     "iopub.status.busy": "2024-06-30T17:27:32.795571Z",
+     "iopub.status.idle": "2024-06-30T17:27:32.803073Z",
+     "shell.execute_reply": "2024-06-30T17:27:32.801935Z"
+    },
+    "papermill": {
+     "duration": 0.017734,
+     "end_time": "2024-06-30T17:27:32.805462",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:32.787728",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "4.693390458905194"
+      ]
+     },
+     "execution_count": 13,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# x = 10\n",
+    "# b = 2.90794702\n",
+    "# w = 0.17854434\n",
+    "# y_hat = 2.90794702 + 0.17854434*10\n",
+    "reg_model.intercept_[0] + reg_model.coef_[0][1]*10\n",
+    "\n",
+    "# radio 10 için satışlar:\n",
+    "# y_hat = 4.693390458905194"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "id": "408dffce",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-30T17:27:32.820657Z",
+     "iopub.status.busy": "2024-06-30T17:27:32.820262Z",
+     "iopub.status.idle": "2024-06-30T17:27:32.828096Z",
+     "shell.execute_reply": "2024-06-30T17:27:32.826755Z"
+    },
+    "papermill": {
+     "duration": 0.018957,
+     "end_time": "2024-06-30T17:27:32.830936",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:32.811979",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "3.011394464575993"
+      ]
+     },
+     "execution_count": 14,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# x = 40\n",
+    "# b = 2.90794702\n",
+    "# w = 0.00258619\n",
+    "# y_hat = b + w*x\n",
+    "# y_hat = 2.90794702 + 0.00258619*40\n",
+    "reg_model.intercept_[0] + reg_model.coef_[0][2]*40\n",
+    "\n",
+    "# newspaper 10 için satışlar:\n",
+    "# y_hat = 3.011394464575993\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "bd6c41fc",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006767,
+     "end_time": "2024-06-30T17:27:32.844788",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:32.838021",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "## Prediction Success Evaluation"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "id": "6c9637de",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-30T17:27:32.861963Z",
+     "iopub.status.busy": "2024-06-30T17:27:32.861571Z",
+     "iopub.status.idle": "2024-06-30T17:27:32.873634Z",
+     "shell.execute_reply": "2024-06-30T17:27:32.872312Z"
+    },
+    "papermill": {
+     "duration": 0.024083,
+     "end_time": "2024-06-30T17:27:32.876234",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:32.852151",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "1.736902590147092"
+      ]
+     },
+     "execution_count": 15,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Train RMSE\n",
+    "y_pred = reg_model.predict(X_train)\n",
+    "np.sqrt(mean_squared_error(y_train, y_pred))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "id": "7895d60a",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-30T17:27:32.894138Z",
+     "iopub.status.busy": "2024-06-30T17:27:32.892973Z",
+     "iopub.status.idle": "2024-06-30T17:27:32.904043Z",
+     "shell.execute_reply": "2024-06-30T17:27:32.902861Z"
+    },
+    "papermill": {
+     "duration": 0.02255,
+     "end_time": "2024-06-30T17:27:32.906345",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:32.883795",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.8959372632325174"
+      ]
+     },
+     "execution_count": 16,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Train RSQUARE\n",
+    "reg_model.score(X_train, y_train)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "id": "9e2f8ee8",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-30T17:27:32.923120Z",
+     "iopub.status.busy": "2024-06-30T17:27:32.922688Z",
+     "iopub.status.idle": "2024-06-30T17:27:32.935403Z",
+     "shell.execute_reply": "2024-06-30T17:27:32.933807Z"
+    },
+    "papermill": {
+     "duration": 0.024036,
+     "end_time": "2024-06-30T17:27:32.938316",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:32.914280",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "1.4113417558581587"
+      ]
+     },
+     "execution_count": 17,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Test RMSE\n",
+    "y_pred = reg_model.predict(X_test)\n",
+    "np.sqrt(mean_squared_error(y_test, y_pred))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b1822eac",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006962,
+     "end_time": "2024-06-30T17:27:32.952586",
+     "exception": false,
+     "start_time": "2024-06-30T17:27:32.945624",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kaggle": {
+   "accelerator": "none",
+   "dataSources": [
+    {
+     "datasetId": 5309605,
+     "sourceId": 8825252,
+     "sourceType": "datasetVersion"
+    }
+   ],
+   "dockerImageVersionId": 30732,
+   "isGpuEnabled": false,
+   "isInternetEnabled": true,
+   "language": "python",
+   "sourceType": "notebook"
+  },
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.10.13"
+  },
+  "papermill": {
+   "default_parameters": {},
+   "duration": 7.022984,
+   "end_time": "2024-06-30T17:27:33.582110",
+   "environment_variables": {},
+   "exception": null,
+   "input_path": "__notebook__.ipynb",
+   "output_path": "__notebook__.ipynb",
+   "parameters": {},
+   "start_time": "2024-06-30T17:27:26.559126",
+   "version": "2.5.0"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
